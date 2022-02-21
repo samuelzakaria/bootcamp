@@ -19,6 +19,17 @@ Lambda was set into 0.01,0.1,1,10 on both regression. From 4 different lambdas, 
 Here is the reference website that i used to learn about the regression:
 https://www.datacamp.com/community/tutorials/tutorial-ridge-lasso-elastic-net
 
+MAE : It is the mean of the absolute value of the errors. It measures the difference between two continuous variables, here actual and predicted values of y. 
+MAPE: It is the value representative MAE in percentage. 
+RMSE: The mean square error (MSE) is just like the MAE, but squares the difference before summing them all instead of using the absolute value. 
 
+MAE Lasso vs Ridge :
+4.8047 vs 4.8045
 
+MAE Lasso vs Ridge :
+23.083 vs 23.085
 
+RMSE Lasso vs Ridge :
+16.3% vs 16.32%
+
+It means both of the model is fit to predict house price with the result above because the difference is very small.
