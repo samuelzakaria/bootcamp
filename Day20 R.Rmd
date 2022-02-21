@@ -1,0 +1,170 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r}
+library (readr)
+
+urlfile="https://raw.githubusercontent.com/pararawendy/dibimbing-materials/main/boston.csv"
+
+data<-read_csv(url(urlfile))
+```
+```{r}
+library(caTools)
+set.seed(123)
+sample <- sample.split(data$medv,SplitRatio = .80)
+train <- subset(data, sample ==TRUE)
+test <- subset(data, sample == FALSE)
+```
+
+```{r}
+library(psych)
+pairs.panels(train,
+            method = 'pearson',
+            hist.col = '#00AFBB',
+            density =TRUE,
+            ellipse = TRUE
+            )
+```
+```{r}
+x<- model.matrix(medv~.,train)[,-1]
+y<- train$medv
+```
+
+
+```{r}
+library(glmnet)
+ridge_reg <-glmnet(x,y,alpha = 0, lambda= 0.1)
+coef(ridge_reg)
+
+lasso_reg <- glmnet(x, y, alpha = 1, lambda = 0.1)
+coef(lasso_reg)
+```
+```{r}
+set.seed(123)
+sample <-sample.split(data$medv,SplitRatio = 0.8)
+pre_train <- subset(data, sample==TRUE)
+sample_train <- sample.split(pre_train$medv, SplitRatio = 0.8)
+
+train <- subset(pre_train, sample_train == TRUE)
+validation <- subset(pre_train, sample_train == FALSE)
+
+test <- subset(data, sample = FALSE)
+```
+
+```{r}
+library(dplyr)
+library(caret)
+library(car)
+
+model <- lm(medv~.,train)
+
+vif(model)
+
+drop_col <-c('tax','rad')
+train <- train %>%
+  select(-drop_col)
+validation <- validation %>%
+  select(-drop_col)
+test <- test %>%
+  select(-drop_col)
+
+```
+
+
+```{r}
+x <- model.matrix(medv~.,train)[,-1]
+y <- train$medv
+```
+
+```{r}
+library(glmnet)
+ridge_reg_1 <-glmnet(x,y, alpha = 0, lambda =0.01)
+coef(ridge_reg_1)
+
+ridge_reg_2 <-glmnet(x,y, alpha = 0, lambda =0.1)
+coef(ridge_reg_2)
+
+ridge_reg_3 <-glmnet(x,y, alpha = 0, lambda =1)
+coef(ridge_reg_3)
+
+ridge_reg_4 <-glmnet(x,y, alpha = 0, lambda =10)
+coef(ridge_reg_4)
+
+
+```
+```{r}
+x_validation <- model.matrix(medv~.,validation)[,-1]
+y_validation <- validation$medv
+
+RMSE_ridge_1 <- sqrt(mean((y_validation - predict(ridge_reg_1, x_validation))^2))
+RMSE_ridge_1
+
+RMSE_ridge_2 <- sqrt(mean((y_validation - predict(ridge_reg_2, x_validation))^2))
+RMSE_ridge_2 
+
+RMSE_ridge_3 <- sqrt(mean((y_validation - predict(ridge_reg_3, x_validation))^2))
+RMSE_ridge_3 
+
+RMSE_ridge_4 <- sqrt(mean((y_validation - predict(ridge_reg_4, x_validation))^2))
+RMSE_ridge_4 
+
+```
+```{r}
+lasso_reg_1 <-glmnet(x,y, alpha = 1, lambda =0.01)
+coef(lasso_reg_1)
+
+lasso_reg_2 <-glmnet(x,y, alpha = 1, lambda =0.1)
+coef(lasso_reg_2)
+
+lasso_reg_3 <-glmnet(x,y, alpha = 1, lambda =1)
+coef(lasso_reg_3)
+
+lasso_reg_4 <-glmnet(x,y, alpha = 1, lambda =10)
+coef(lasso_reg_4)
+```
+
+```{r}
+RMSE_lasso_1 <- sqrt(mean((y_validation - predict(lasso_reg_1, x_validation))^2))
+RMSE_lasso_1
+
+RMSE_lasso_2 <- sqrt(mean((y_validation - predict(lasso_reg_2, x_validation))^2))
+RMSE_lasso_2 
+
+RMSE_lasso_3 <- sqrt(mean((y_validation - predict(lasso_reg_3, x_validation))^2))
+RMSE_lasso_3 
+
+RMSE_lasso_4 <- sqrt(mean((y_validation - predict(lasso_reg_4, x_validation))^2))
+RMSE_lasso_4 
+```
+```{r}
+x_test <- model.matrix(medv~.,test)[,-1]
+y_test <- test$medv
+
+RMSE_ridge_best <- sqrt(mean((y_test - predict(ridge_reg_1, x_test))^2))
+RMSE_ridge_best
+
+MAE_ridge_best <- mean(abs((y_test - predict(ridge_reg_1, x_test))^2))
+MAE_ridge_best
+
+MAPE_ridge_best <- mean(abs((predict(ridge_reg_1, x_test) - y_test))/y_test)
+MAPE_ridge_best
+
+RMSE_lasso_best <- sqrt(mean((y_test - predict(lasso_reg_1, x_test))^2))
+RMSE_lasso_best
+
+MAE_lasso_best <- mean(abs((y_test - predict(lasso_reg_1, x_test))^2))
+MAE_lasso_best
+
+MAPE_lasso_best <- mean(abs((predict(lasso_reg_1, x_test) - y_test))/y_test)
+MAPE_lasso_best
+```
+
